@@ -4,19 +4,35 @@ import { EVENT_METADATA_KEY } from "./Event";
 import { SELECTOR_METADATA_KEY } from "./Select";
 
 export default class DIContainer {
-  private static classes = new Map<Function, new () => any>();
-  private static instances = new Map<Function, any>();
+  private static instance: DIContainer | null = null;;
+  private classes = new Map<Function, new () => any>();
+  private instances = new Map<Function, any>();
 
-  static register(cls: new () => any) {
+  register(cls: new () => any) {
     this.classes.set(cls, cls);
   }
 
-  static registerSubscriber(
+  static getInstance(): DIContainer {
+    if (!this.instance) {
+      this.instance = new DIContainer();
+    }
+    return DIContainer.instance!;
+  }
+
+  static resetInstance(): void {
+    if (DIContainer.instance){
+      DIContainer.instance.classes.clear();
+      DIContainer.instance.instances.clear();
+      DIContainer.instance = null;
+    }
+  }
+
+  registerSubscriber(
     listenerInstance: any,
     sourceClass: new () => any,
     methodName: string
   ) {
-    const sourceInstance = DIContainer.get(sourceClass);
+    const sourceInstance = this.get(sourceClass);
     Object.values(sourceInstance).forEach(value => {
       if (value instanceof ObservableClass) {
         value.subscribe(listenerInstance[methodName].bind(listenerInstance));
@@ -24,7 +40,7 @@ export default class DIContainer {
     });
   }
 
-  static registerEvent(
+  registerEvent(
     instance: any,
   ){ 
     console.log("me ejecuto y registro eventos a la instancia: ", instance)
@@ -34,7 +50,6 @@ export default class DIContainer {
     console.log(`Yo soy el prototipo:`, prototype, `yo soy los nombres de los métodos: ${methodNames}`)
 
     for (const methodName of methodNames) {
-      // Excluimos explícitamente el constructor
       if (methodName === 'constructor') {
         continue;
       }
@@ -56,7 +71,7 @@ export default class DIContainer {
     }
   }
 
-  static get<T>(cls: new () => T): T {
+  get<T>(cls: new () => T): T {
     if (!this.instances.has(cls)) {
       const instance = new cls();
       this.instances.set(cls, instance);
@@ -76,7 +91,7 @@ export default class DIContainer {
     return this.instances.get(cls);
   }
 
-  static bootstrap() {
+  bootstrap() {
     this.classes.forEach(cls => this.get(cls));
   }
 }
