@@ -6,7 +6,8 @@
   "module": "dist/nautilus.es.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "vite build && node scripts/copy-package-json.js"
+    "build": "vite build && node scripts/copy-package-json.js",
+    "dev" : "vite dev"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.4",
