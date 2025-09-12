@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["vitest/globals"],
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
@@ -15,12 +16,14 @@
     "outDir": "./dist",
     "lib": ["ES2022", "DOM"],
     "allowSyntheticDefaultImports": true,
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
   },
   "include": [
     "src/**/*", 
     "lib/*.ts",
-    "*.ts"
+    "test/**/*",
+    "*.ts",
+    "."
   ],
   "exclude": ["node_modules", "dist"]
 }
