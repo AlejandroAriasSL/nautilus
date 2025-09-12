@@ -1,5 +1,3 @@
-import DIContainer from "./DIContainer"
-
 export const EVENT_METADATA_KEY = Symbol("event")
 
 
