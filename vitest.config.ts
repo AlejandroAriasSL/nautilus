@@ -13,6 +13,10 @@ export default defineConfig ({
         setupFiles: ['./vitest.setup.js'],
         alias:{
             '@src/': path.resolve(__dirname, './src')
+        },
+        coverage: {
+            provider: "v8",
+            enabled: true
         }
     },
 })
