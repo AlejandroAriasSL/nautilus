@@ -1,8 +1,8 @@
 import DIContainer from "@src/DIContainer";
 import Event, { EVENT_METADATA_KEY } from "@src/Event"
 import Select from "@src/Select"
-import { Window } from "happy-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest"
+import { MockComponent } from "./mocks/MockComponent";
 
 
 describe("@Event decorator", () => {
@@ -38,15 +38,13 @@ describe("@Event decorator", () => {
         const { MockComponent } = await import("./mocks/MockComponent");
 
         const container = DIContainer.getInstance();
-        const mockInstance = container.get(MockComponent);
+        const mockInstance = container.get<MockComponent>(MockComponent);
         
-        mockInstance.onChange = vi.fn();
-
-        container.registerEvent(mockInstance);
+        const spy = vi.spyOn(mockInstance, "onChange")
 
         button.click();
 
-        expect(mockInstance.onChange).toHaveBeenCalledTimes(1);
-        expect(mockInstance.onChange).toHaveBeenCalledWith(expect.any(MouseEvent));
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(expect.any(MouseEvent));
     })
 })

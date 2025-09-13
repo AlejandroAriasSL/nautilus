@@ -3,13 +3,15 @@ import { SubscriberRegistry } from "@src/Subscriber.js";
 import { EVENT_METADATA_KEY } from "./Event";
 import { SELECTOR_METADATA_KEY } from "./Select";
 
-export default class DIContainer {
-  private static instance: DIContainer | null = null;;
-  private classes = new Map<Function, new () => any>();
-  private instances = new Map<Function, any>();
+type Constructor<T = any> = new () => T; 
 
-  register(cls: new () => any) {
-    this.classes.set(cls, cls);
+export default class DIContainer {
+  private static instance: DIContainer | null = null;
+  private classes = new Set<Constructor>();
+  private instances = new Map<Constructor, unknown>();
+
+  register<T>(constructor: Constructor<T>) : void {
+    this.classes.add(constructor);
   }
 
   static getInstance(): DIContainer {
@@ -27,71 +29,81 @@ export default class DIContainer {
     }
   }
 
-  registerSubscriber(
-    listenerInstance: any,
-    sourceClass: new () => any,
-    methodName: string
-  ) {
-    const sourceInstance = this.get(sourceClass);
-    Object.values(sourceInstance).forEach(value => {
-      if (value instanceof ObservableClass) {
-        value.subscribe(listenerInstance[methodName].bind(listenerInstance));
-      }
-    });
+
+  private createInstance<T>(constructor : Constructor<T>) : T {
+    const instance = new constructor();
+    this.instances.set(constructor, instance)
+    return instance;
   }
 
   registerEvent(
     instance: any,
   ){ 
-    console.log("me ejecuto y registro eventos a la instancia: ", instance)
     const prototype = Object.getPrototypeOf(instance);
     const methodNames = Object.getOwnPropertyNames(prototype);
-
-    console.log(`Yo soy el prototipo:`, prototype, `yo soy los nombres de los métodos: ${methodNames}`)
 
     for (const methodName of methodNames) {
       if (methodName === 'constructor') {
         continue;
       }
 
-      console.log("Soy el nombre de método que tiene un evento: ", methodName)
-      console.log("yo soy el método: ", prototype[methodName])
       const eventType = Reflect.getMetadata(EVENT_METADATA_KEY, prototype[methodName], "method");
       const selector = Reflect.getMetadata(SELECTOR_METADATA_KEY, prototype[methodName], "method");
-
-      console.log(eventType, selector)
 
       if (eventType && selector) {
         const element = document.querySelector(selector);
         if (element) {
-          const boundMethod = instance[methodName].bind(instance);
-          element.addEventListener(eventType, boundMethod);
+          element.addEventListener(eventType, this.preserveThis(instance, methodName));
         }
       }
     }
   }
 
-  get<T>(cls: new () => T): T {
-    if (!this.instances.has(cls)) {
-      const instance = new cls();
-      this.instances.set(cls, instance);
-
+  get<T>(constructor: Constructor): T {
+    if (!this.instances.has(constructor)) {
+      const instance = this.createInstance(constructor);
       this.registerEvent(instance)
+      this.initSubscribers(instance, constructor)
+    }
+    return this.instances.get(constructor) as T;
+  }
 
-      if (SubscriberRegistry.has(cls)) {
-        for (const { method, observableKey } of SubscriberRegistry.get(cls)!) {
-          const fn = (instance as any)[method].bind(instance);
-          const obs = (instance as any)[observableKey] as ObservableClass<any>;
-          if (obs instanceof ObservableClass) {
-            obs.subscribe(fn);
-          }
-        }
+  registerSubscriber(
+    listenerInstance: any,
+    sourceClass: Constructor,
+    methodName: string
+  ) {
+    const sourceInstance = this.get<any>(sourceClass);
+    Object.values(sourceInstance).forEach(value => {
+      if (value instanceof ObservableClass) {
+        value.subscribe(this.preserveThis(listenerInstance, methodName));
+      }
+    });
+  }
+
+  private initSubscribers(instance : any, constructor: Constructor) : void {
+    if (!SubscriberRegistry.has(constructor)) return;
+
+    for (const { method, observableKey } of SubscriberRegistry.get(constructor)!) {
+      const observable = (instance as any)[observableKey] as ObservableClass<any>;
+      if (observable instanceof ObservableClass) {
+        observable.subscribe(this.preserveThis(instance, method))
       }
     }
-    return this.instances.get(cls);
+  }
+
+  private preserveThis<T extends object, K extends keyof T>(
+    instance: T, 
+    methodName: K
+  ) : (...args: any[]) => any 
+  {
+    return (...args: any[]) => {
+      const method = instance[methodName];
+      return (method as Function).apply(instance, args);
+    } 
   }
 
   bootstrap() {
-    this.classes.forEach(cls => this.get(cls));
+    this.classes.forEach(constructor => this.get(constructor));
   }
 }
