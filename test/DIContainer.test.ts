@@ -9,7 +9,7 @@ describe("DIContainer", () => {
     class Foo{}
 
     beforeEach(() =>  {
-        container = DIContainer.getInstance()
+        container = DIContainer.getInstance();
     })
 
     it("should register classes correctly", () => {
@@ -19,11 +19,19 @@ describe("DIContainer", () => {
 
     it("should clean previous instances", ()=> {
 
-        expect(container.hasClass(Foo)).toBe(true)
+        expect(container.hasClass(Foo)).toBe(true);
 
         DIContainer.resetInstance();
         container = DIContainer.getInstance();
 
-        expect(container.hasClass(Foo)).toBe(false)
+        expect(container.hasClass(Foo)).toBe(false);
+    })
+
+    it("should retrieve same instance for multiple requests", () => {
+
+        const fooInstance = container.get<Foo>(Foo);
+        const fooInstance2 = container.get<Foo>(Foo);
+
+        expect(fooInstance).toBe(fooInstance2);
     })
 })
