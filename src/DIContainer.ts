@@ -5,23 +5,29 @@ import { SELECTOR_METADATA_KEY } from "./Select";
 
 type Constructor<T = any> = new () => T; 
 
+interface EventMetaData {
+  methodName: string;
+  eventType: string;
+  selector: string;
+}
+
 export default class DIContainer {
   private static instance: DIContainer | null = null;
   private classes = new Set<Constructor>();
   private instances = new Map<Constructor, unknown>();
 
-  register<T>(constructor: Constructor<T>) : void {
+  public register<T>(constructor: Constructor<T>) : void {
     this.classes.add(constructor);
   }
 
-  static getInstance(): DIContainer {
+  public static getInstance(): DIContainer {
     if (!this.instance) {
       this.instance = new DIContainer();
     }
     return DIContainer.instance!;
   }
 
-  static resetInstance(): void {
+  public static resetInstance(): void {
     if (DIContainer.instance){
       DIContainer.instance.classes.clear();
       DIContainer.instance.instances.clear();
@@ -29,41 +35,38 @@ export default class DIContainer {
     }
   }
 
-
   private createInstance<T>(constructor : Constructor<T>) : T {
     const instance = new constructor();
-    this.instances.set(constructor, instance)
+    this.instances.set(constructor, instance);
     return instance;
   }
 
-  registerEvent(
-    instance: any,
-  ){ 
+  private lookForEvents(instance: any) : EventMetaData[] { 
     const prototype = Object.getPrototypeOf(instance);
-    const methodNames = Object.getOwnPropertyNames(prototype);
 
-    for (const methodName of methodNames) {
-      if (methodName === 'constructor') {
-        continue;
-      }
-
-      const eventType = Reflect.getMetadata(EVENT_METADATA_KEY, prototype[methodName], "method");
-      const selector = Reflect.getMetadata(SELECTOR_METADATA_KEY, prototype[methodName], "method");
-
-      if (eventType && selector) {
-        const element = document.querySelector(selector);
-        if (element) {
-          element.addEventListener(eventType, this.preserveThis(instance, methodName));
-        }
-      }
-    }
+    return Object.getOwnPropertyNames(prototype)
+      .filter((name) => name !== "constructor")
+      .map(name => ({
+        methodName : name,
+        eventType: Reflect.getMetadata(EVENT_METADATA_KEY, prototype[name], "method"),
+        selector: Reflect.getMetadata(SELECTOR_METADATA_KEY, prototype[name], "method")
+      }))
+      .filter((meta) => Boolean(meta.eventType && meta.selector));
   }
 
-  get<T>(constructor: Constructor): T {
+  private registerEvents(instance: any){
+    this.lookForEvents(instance)
+      .forEach(({methodName, eventType, selector}) => {
+        const element = document.querySelector(selector)
+        element?.addEventListener(eventType, this.preserveThis(instance, methodName))
+      });
+  }
+
+  public get<T>(constructor: Constructor): T {
     if (!this.instances.has(constructor)) {
       const instance = this.createInstance(constructor);
-      this.registerEvent(instance)
-      this.initSubscribers(instance, constructor)
+      this.registerEvents(instance);
+      this.initSubscribers(instance, constructor);
     }
     return this.instances.get(constructor) as T;
   }
@@ -107,7 +110,7 @@ export default class DIContainer {
     return this.classes.has(constructor);
   }
 
-  bootstrap() {
+  public bootstrap() {
     this.classes.forEach(constructor => this.get(constructor));
   }
 }
