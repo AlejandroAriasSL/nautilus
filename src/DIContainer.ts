@@ -54,7 +54,7 @@ export default class DIContainer {
       .filter((meta) => Boolean(meta.eventType && meta.selector));
   }
 
-  private registerEvents(instance: any){
+  private registerEvents(instance: any) : void {
     this.lookForEvents(instance)
       .forEach(({methodName, eventType, selector}) => {
         const element = document.querySelector(selector)
@@ -77,11 +77,10 @@ export default class DIContainer {
     methodName: string
   ) {
     const sourceInstance = this.get<any>(sourceClass);
-    Object.values(sourceInstance).forEach(value => {
-      if (value instanceof ObservableClass) {
-        value.subscribe(this.preserveThis(listenerInstance, methodName));
-      }
-    });
+
+    Object.values(sourceInstance)
+      .filter(observable => observable instanceof ObservableClass)
+      .forEach(observable => observable.subscribe(this.preserveThis(listenerInstance, methodName)));
   }
 
   private initSubscribers(instance : any, constructor: Constructor) : void {
