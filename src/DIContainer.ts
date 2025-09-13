@@ -103,6 +103,10 @@ export default class DIContainer {
     } 
   }
 
+  public hasClass(constructor : Constructor) : boolean {
+    return this.classes.has(constructor);
+  }
+
   bootstrap() {
     this.classes.forEach(constructor => this.get(constructor));
   }
