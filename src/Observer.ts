@@ -1,4 +1,4 @@
-export type Observer<T> = (value: T) => void;
+import { Observer } from "@src/types";
 
 export default class ObservableClass<T> {
   private subscribers: Observer<T>[] = [];

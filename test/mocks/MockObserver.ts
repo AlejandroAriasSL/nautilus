@@ -1,7 +1,7 @@
-import Event from "@src/Event";
-import Injectable from "@src/Injectable";
+import Event from "@decorators/Event";
+import Injectable from "@decorators/Injectable";
 import ObservableClass from "@src/Observer";
-import Select from "@src/Select";
+import Select from "@decorators/Select";
 
 @Injectable
 export class MockObserver{

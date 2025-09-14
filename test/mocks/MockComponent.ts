@@ -1,5 +1,5 @@
-import Event from "@src/Event";
-import Select from "@src/Select";
+import Event from "@decorators/Event";
+import Select from "@decorators/Select";
 
 export class MockComponent {
     @Select("#test-button")
