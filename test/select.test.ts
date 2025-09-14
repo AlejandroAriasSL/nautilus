@@ -1,19 +1,20 @@
-import Select, { SELECTOR_METADATA_KEY } from "@src/Select";
-
+import Select, { SELECTOR_METADATA_KEY } from "@src/decorators/Select";
 
 describe("@Select decorator", () => {
+  it("It should define metadata on the decorated method", () => {
+    const mockSelector = "mockSelector";
 
-    it("It should define metadata on the decorated method", () => {
+    class MockComponent {
+      @Select(mockSelector)
+      onSelect() {}
+    }
 
-        const mockSelector = "mockSelector";
+    const metadata = Reflect.getMetadata(
+      SELECTOR_METADATA_KEY,
+      MockComponent.prototype.onSelect,
+      "method"
+    );
 
-        class MockComponent{
-            @Select(mockSelector)
-            onSelect(){}
-        }
-
-        const metadata = Reflect.getMetadata(SELECTOR_METADATA_KEY, MockComponent.prototype.onSelect, "method");
-
-        expect(metadata).toEqual(mockSelector)
-    })
-})
+    expect(metadata).toEqual(mockSelector);
+  });
+});

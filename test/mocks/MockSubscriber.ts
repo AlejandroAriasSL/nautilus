@@ -1,6 +1,6 @@
-import Subscriber from "@src/Subscriber";
+import Subscriber from "@decorators/Subscriber";
 import { MockObserver } from "./MockObserver";
-import Injectable from "@src/Injectable";
+import Injectable from "@decorators/Injectable";
 
 @Injectable
 export class MockSubscriber{

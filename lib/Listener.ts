@@ -1,5 +1,5 @@
-import Injectable from "@src/Injectable";
-import Subscriber from "@src/Subscriber";
+import Injectable from "@src/decorators/Injectable";
+import Subscriber from "@src/decorators/Subscriber";
 import Product from "./Product";
 
 @Injectable

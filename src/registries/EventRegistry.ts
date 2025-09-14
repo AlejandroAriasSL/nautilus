@@ -1,7 +1,7 @@
-import { EVENT_METADATA_KEY } from "./Event";
-import RegisterClass from "./RegisterClass";
-import Registry from "./Registry";
-import { SELECTOR_METADATA_KEY } from "./Select";
+import { EVENT_METADATA_KEY } from "@decorators/Event";
+import RegisterClass from "@decorators/RegisterClass";
+import Registry from "@registries/Registry";
+import { SELECTOR_METADATA_KEY } from "@decorators/Select";
 
 interface EventMetaData {
   methodName: string;

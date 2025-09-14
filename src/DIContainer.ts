@@ -1,6 +1,5 @@
-import Registry from "@src/Registry";
-
-export type Constructor<T = any> = new () => T; 
+import Registry from "@src/registries/Registry";
+import { Constructor } from "@src/types";
 
 export default class DIContainer {
   private static instance: DIContainer | null = null;

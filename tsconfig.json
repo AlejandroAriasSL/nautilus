@@ -5,7 +5,9 @@
     "baseUrl": ".",
     "paths": {
       "@src/*": ["src/*"],
-      "@lib/*": ["lib/*"]
+      "@lib/*": ["lib/*"],
+      "@decorators/*": ["src/decorators/*"],
+      "@registries/*": ["src/registries/*"]
     },
     "strict": true,
     "target": "ES2022",

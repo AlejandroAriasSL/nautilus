@@ -1,8 +1,9 @@
-import RegisterClass from "@src/RegisterClass";
-import Registry from "@src/Registry";
-import { SUBSCRIBER_METADATA_KEY } from "@src/Subscriber";
-import DIContainer, { Constructor } from "@src/DIContainer";
+import RegisterClass from "@decorators/RegisterClass";
+import Registry from "@registries/Registry";
+import { SUBSCRIBER_METADATA_KEY } from "@decorators/Subscriber";
+import DIContainer from "@src/DIContainer";
 import ObservableClass from "@src/Observer";
+import { Constructor } from "@src/types";
 
 export interface SubscriberMetadata {
   listenerInstance: any;

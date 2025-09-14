@@ -17,6 +17,8 @@ export default defineConfig({
     alias: {
       '@src': path.resolve(__dirname, './src'),
       '@lib': path.resolve(__dirname, './lib'),
+      '@decorators': path.resolve(__dirname, './src/decorators'),
+      '@registries': path.resolve(__dirname, './src/registries')
     },
   },
   build: {
