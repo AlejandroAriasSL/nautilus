@@ -66,7 +66,6 @@ export default class DIContainer {
     if (!this.instances.has(constructor)) {
       const instance = this.createInstance(constructor);
       this.registerEvents(instance);
-      this.initSubscribers(instance, constructor);
     }
     return this.instances.get(constructor) as T;
   }
@@ -81,17 +80,6 @@ export default class DIContainer {
     Object.values(sourceInstance)
       .filter(observable => observable instanceof ObservableClass)
       .forEach(observable => observable.subscribe(this.preserveThis(listenerInstance, methodName)));
-  }
-
-  private initSubscribers(instance : any, constructor: Constructor) : void {
-    if (!SubscriberRegistry.has(constructor)) return;
-
-    for (const { method, observableKey } of SubscriberRegistry.get(constructor)!) {
-      const observable = (instance as any)[observableKey] as ObservableClass<any>;
-      if (observable instanceof ObservableClass) {
-        observable.subscribe(this.preserveThis(instance, method))
-      }
-    }
   }
 
   private preserveThis<T extends object, K extends keyof T>(
