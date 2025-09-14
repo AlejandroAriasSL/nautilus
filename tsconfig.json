@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "types": ["vitest/globals"],
+    "rootDir": ".",
+    "baseUrl": ".",
     "paths": {
-      "@src/*": ["*"]
+      "@src/*": ["src/*"],
+      "@lib/*": ["lib/*"]
     },
     "strict": true,
     "target": "ES2022",
@@ -13,10 +16,14 @@
     "outDir": "./dist",
     "lib": ["ES2022", "DOM"],
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*", 
+    "lib/*.ts",
+    "test/**/*",
+    "*.ts",
+    "."
+  ],
   "exclude": ["node_modules", "dist"]
 }

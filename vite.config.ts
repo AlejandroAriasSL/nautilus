@@ -9,13 +9,14 @@ export default defineConfig({
     dtsPlugin({
       insertTypesEntry: true,
     }),
-    ts({
-      tsconfig: "./tsconfig.json"
-    })
   ],
+  esbuild:{
+    target: "ES2022"
+  },
   resolve: {
     alias: {
       '@src': path.resolve(__dirname, './src'),
+      '@lib': path.resolve(__dirname, './lib'),
     },
   },
   build: {
