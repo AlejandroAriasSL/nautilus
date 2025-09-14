@@ -35,7 +35,7 @@ describe("@Event decorator", () => {
         document.body.appendChild(button);
         const container = DIContainer.getInstance();
         
-        const { default: EventRegistry } = await import("@src/EventRegistry")
+        await import("@src/EventRegistry")
         const { MockComponent } = await import("./mocks/MockComponent");
         
         const mockInstance = container.get<MockComponent>(MockComponent);

@@ -1,7 +1,6 @@
-import  ObservableClass  from "@src/Observer.js";
 import Registry from "@src/Registry";
 
-type Constructor<T = any> = new () => T; 
+export type Constructor<T = any> = new () => T; 
 
 export default class DIContainer {
   private static instance: DIContainer | null = null;
@@ -44,31 +43,6 @@ export default class DIContainer {
       this.createInstance(constructor);
     }
     return this.instances.get(constructor) as T;
-  }
-
-  registerSubscriber(
-    listenerInstance: any,
-    sourceClass: Constructor,
-    methodName: string
-  ) {
-    const sourceInstance = this.get<any>(sourceClass);
-
-    console.log("registering observable")
-
-    Object.values(sourceInstance)
-      .filter(observable => observable instanceof ObservableClass)
-      .forEach(observable => observable.subscribe(this.preserveThis(listenerInstance, methodName)));
-  }
-
-  private preserveThis<T extends object, K extends keyof T>(
-    instance: T, 
-    methodName: K
-  ) : (...args: any[]) => any 
-  {
-    return (...args: any[]) => {
-      const method = instance[methodName];
-      return (method as Function).apply(instance, args);
-    } 
   }
 
   public hasClass(constructor : Constructor) : boolean {

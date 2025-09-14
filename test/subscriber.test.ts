@@ -1,5 +1,4 @@
 import DIContainer from "@src/DIContainer";
-import { MockSubscriber } from "./mocks/MockSubscriber";
 
 describe("@Subscriber decorator", () => {
     let container : DIContainer;
@@ -16,12 +15,15 @@ describe("@Subscriber decorator", () => {
 
     it("should link the decorated method with an Observable from another class", async() => {
 
+        await import("@src/EventRegistry")
+        await import("@src/SubscriberRegistry")
         const { MockSubscriber } = await import("./mocks/MockSubscriber");
         
-        const suscriberInstance = container.get<MockSubscriber>(MockSubscriber); 
-        
-        const spy = vi.spyOn(suscriberInstance, "onNewProduct") 
+        const subscriberInstance = container.get<any>(MockSubscriber);
 
+        const spy = vi.spyOn(subscriberInstance, "onNewProduct") 
+        
+        container.bootstrap()
         button.click();
 
         expect(spy).toBeCalledTimes(1);
