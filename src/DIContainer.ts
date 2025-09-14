@@ -1,20 +1,14 @@
 import  ObservableClass  from "@src/Observer.js";
-import { SubscriberRegistry } from "@src/Subscriber.js";
-import { EVENT_METADATA_KEY } from "./Event";
-import { SELECTOR_METADATA_KEY } from "./Select";
+import Registry from "@src/Registry";
 
 type Constructor<T = any> = new () => T; 
 
-interface EventMetaData {
-  methodName: string;
-  eventType: string;
-  selector: string;
-}
-
 export default class DIContainer {
   private static instance: DIContainer | null = null;
+
   private classes = new Set<Constructor>();
   private instances = new Map<Constructor, unknown>();
+  private registers: Set<Registry> = new Set<Registry>();
 
   public register<T>(constructor: Constructor<T>) : void {
     this.classes.add(constructor);
@@ -35,37 +29,19 @@ export default class DIContainer {
     }
   }
 
+  public addRegistry(registry: Registry){
+    this.registers.add(registry);
+  }
+
   private createInstance<T>(constructor : Constructor<T>) : T {
     const instance = new constructor();
     this.instances.set(constructor, instance);
     return instance;
   }
 
-  private lookForEvents(instance: any) : EventMetaData[] { 
-    const prototype = Object.getPrototypeOf(instance);
-
-    return Object.getOwnPropertyNames(prototype)
-      .filter((name) => name !== "constructor")
-      .map(name => ({
-        methodName : name,
-        eventType: Reflect.getMetadata(EVENT_METADATA_KEY, prototype[name], "method"),
-        selector: Reflect.getMetadata(SELECTOR_METADATA_KEY, prototype[name], "method")
-      }))
-      .filter((meta) => Boolean(meta.eventType && meta.selector));
-  }
-
-  private registerEvents(instance: any) : void {
-    this.lookForEvents(instance)
-      .forEach(({methodName, eventType, selector}) => {
-        const element = document.querySelector(selector)
-        element?.addEventListener(eventType, this.preserveThis(instance, methodName))
-      });
-  }
-
   public get<T>(constructor: Constructor): T {
     if (!this.instances.has(constructor)) {
-      const instance = this.createInstance(constructor);
-      this.registerEvents(instance);
+      this.createInstance(constructor);
     }
     return this.instances.get(constructor) as T;
   }
@@ -76,6 +52,8 @@ export default class DIContainer {
     methodName: string
   ) {
     const sourceInstance = this.get<any>(sourceClass);
+
+    console.log("registering observable")
 
     Object.values(sourceInstance)
       .filter(observable => observable instanceof ObservableClass)
@@ -99,5 +77,6 @@ export default class DIContainer {
 
   public bootstrap() {
     this.classes.forEach(constructor => this.get(constructor));
+    this.instances.forEach(instance => this.registers.forEach(register => register.register(instance)))
   }
 }

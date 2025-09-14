@@ -4,7 +4,6 @@ import Select from "@src/Select"
 import {beforeEach, describe, expect, it, vi} from "vitest"
 import { MockComponent } from "./mocks/MockComponent";
 
-
 describe("@Event decorator", () => {
 
 
@@ -34,14 +33,15 @@ describe("@Event decorator", () => {
         const button = document.createElement("button");
         button.id = "test-button";
         document.body.appendChild(button);
-
-        const { MockComponent } = await import("./mocks/MockComponent");
-
         const container = DIContainer.getInstance();
-        const mockInstance = container.get<MockComponent>(MockComponent);
         
+        const { default: EventRegistry } = await import("@src/EventRegistry")
+        const { MockComponent } = await import("./mocks/MockComponent");
+        
+        const mockInstance = container.get<MockComponent>(MockComponent);
         const spy = vi.spyOn(mockInstance, "onChange")
-
+        
+        container.bootstrap();
         button.click();
 
         expect(spy).toHaveBeenCalledTimes(1);
