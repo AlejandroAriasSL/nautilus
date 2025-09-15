@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strictPropertyInitialization": false,
     "types": ["vitest/globals"],
     "rootDir": ".",
     "baseUrl": ".",
@@ -7,7 +8,8 @@
       "@src/*": ["src/*"],
       "@lib/*": ["lib/*"],
       "@decorators/*": ["src/decorators/*"],
-      "@registries/*": ["src/registries/*"]
+      "@registries/*": ["src/registries/*"],
+      "@generated/*": ["build/generated/*"]
     },
     "strict": true,
     "target": "ES2022",
@@ -19,11 +21,13 @@
     "lib": ["ES2022", "DOM"],
     "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": [
     "src/**/*", 
     "lib/*.ts",
-    "test/**/*",
+    "test/**/*.ts",
     "*.ts",
     "."
   ],

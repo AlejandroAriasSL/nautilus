@@ -5,6 +5,9 @@
   "main": "dist/nautilus.es.js",
   "module": "dist/nautilus.es.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "nautilus": "./bin/nautilus.mjs"
+  },
   "scripts": {
     "build": "vite build && node scripts/copy-package-json.js",
     "dev": "vite dev"
@@ -13,6 +16,8 @@
     "@rollup/plugin-typescript": "^12.1.4",
     "@vitest/coverage-v8": "^3.2.4",
     "happy-dom": "^18.0.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.1.6",
     "vite": "^7.1.5",
     "vite-tsconfig-paths": "^5.1.4",
@@ -24,6 +29,7 @@
   "dependencies": {
     "@types/reflect-metadata": "^0.0.5",
     "reflect-metadata": "^0.2.2",
+    "ts-morph": "^27.0.0",
     "tslib": "^2.8.1",
     "vite-plugin-dts": "^4.5.4"
   }

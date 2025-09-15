@@ -18,7 +18,8 @@ export default defineConfig({
       '@src': path.resolve(__dirname, './src'),
       '@lib': path.resolve(__dirname, './lib'),
       '@decorators': path.resolve(__dirname, './src/decorators'),
-      '@registries': path.resolve(__dirname, './src/registries')
+      '@registries': path.resolve(__dirname, './src/registries'),
+      '@generated' : path.resolve(__dirname, './build/generated')
     },
   },
   build: {
