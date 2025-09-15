@@ -8,8 +8,11 @@ export default class DIContainer {
   private instances = new Map<Constructor, unknown>();
   private registers: Set<Registry> = new Set<Registry>();
 
+  private constructorNameMappings = new Map<string, Constructor>();
+
   public register<T>(constructor: Constructor<T>) : void {
     this.classes.add(constructor);
+    this.constructorNameMappings.set(constructor.name, constructor);
   }
 
   public static getInstance(): DIContainer {
@@ -31,17 +34,25 @@ export default class DIContainer {
     this.registers.add(registry);
   }
 
-  private createInstance<T>(constructor : Constructor<T>) : T {
-    const instance = new constructor();
+  private createInstance<T>(constructor : Constructor<T>, ...deps: any[]) : T {
+    const instance = new constructor(...deps);
     this.instances.set(constructor, instance);
     return instance;
   }
 
-  public get<T>(constructor: Constructor): T {
+  public get<T>(constructor: Constructor, ...deps: any[]): T {
     if (!this.instances.has(constructor)) {
-      this.createInstance(constructor);
+      this.createInstance(constructor, ...deps);
     }
     return this.instances.get(constructor) as T;
+  }
+
+  public getByTypeName<T>(typeName: string): T {
+    console.log(typeName)
+    const baseName = typeName.split("<")[0].trim();
+    const ctor = this.constructorNameMappings.get(baseName);
+    console.log(ctor)
+    return this.get(ctor!) as T;
   }
 
   public hasClass(constructor : Constructor) : boolean {
