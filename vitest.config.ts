@@ -11,6 +11,7 @@ export default defineConfig({
       "@lib": path.resolve(__dirname, "./lib"),
       "@decorators": path.resolve(__dirname, "./src/decorators"),
       "@registries": path.resolve(__dirname, "./src/registries"),
+      '@generated' : path.resolve(__dirname, './build/generated')
     },
     coverage: {
       provider: "v8",

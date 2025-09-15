@@ -27,7 +27,7 @@
   "include": [
     "src/**/*", 
     "lib/*.ts",
-    "test/**/*",
+    "test/**/*.ts",
     "*.ts",
     "."
   ],
