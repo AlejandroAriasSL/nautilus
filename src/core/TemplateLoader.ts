@@ -1,34 +1,64 @@
-import { error } from "happy-dom/lib/PropertySymbol";
+import ComponentRegistry, { ChildMetadata } from "@src/registries/ComponentRegistry";
+
+interface TemplateRecord{
+    templateUrl: string,
+    componentClass: Function
+}
 
 export default class TemplateLoader{
 
     private static parser = new DOMParser();
-    private static templates = new Map<string, string>;
+    private static templates = new Map<string, TemplateRecord>;
 
-    public static save(path: string, templateUrl: string) : void {
-        this.templates.set(path, templateUrl);
+    public static save(path: string, templateUrl: string, componentClass: Function) : void {
+        this.templates.set(path, {templateUrl, componentClass});
     }
 
     public static async load(path: string) : Promise<void> {
-        const url = this.templates.get(path);
+        const record = this.templates.get(path);
         const root = document.body.querySelector<HTMLElement>("#root");
-        
-        if (!url || !root) return;
-        
-        root.innerHTML = ""
 
-        const template = await this.getTemplate(url).catch(error => console.error(error));
+        if (!record || !root) return;
+
+        const {templateUrl, componentClass} = record   
+        root.innerHTML = ""
+        const template = await this.getTemplate(templateUrl).catch(error => console.error(error));
 
         if(!template) return;
-
         const rootElement = template.querySelector<HTMLTemplateElement>("template");
-
         const clone = rootElement?.content.cloneNode(true);
-
         root.appendChild(clone!);
+
+        console.log("main template loaded")
+
+        const children = ComponentRegistry.getChildren(componentClass); 
+        console.log(children)
+        if (children.length === 0) return;
+
+        this.renderChildren(root, children);
 
         console.log(root)
     } 
+
+    private static async renderChildren(root : HTMLElement, children: ChildMetadata[]) : Promise<void>{
+        for( const child of children){
+            const slot = root.querySelector(child.slot);
+            if (!slot) continue;
+
+            const childDocument = await this.getTemplate(child.templateUrl).catch(err => {
+                console.error(err);
+                return null;
+            });
+            if (!childDocument) continue;
+
+            const childTemplate = childDocument.querySelector<HTMLTemplateElement>("template");
+            if (!childTemplate) continue;
+
+            const childClone = childTemplate.content.cloneNode(true);
+            slot.appendChild(childClone);
+            console.log("children appended to slot")
+        }
+    }
 
     private static async getTemplate(url : string) : Promise<Document> {
         const response = await fetch(url);
@@ -38,7 +68,6 @@ export default class TemplateLoader{
         }
 
         const rawText = await response.text();
-
         return this.parseToHtml(rawText);
     }
 
