@@ -1,18 +1,9 @@
 import { defineConfig } from "vite";
 import path from "path";
-import dtsPlugin from "vite-plugin-dts";
-import nautilus from "./plugins/vite-plugin-nautilus";
+import nautilus from "vite-plugin-nautilus";
 
 export default defineConfig({
-  plugins: [
-    dtsPlugin({
-      insertTypesEntry: true,
-    }),
-    nautilus(),
-  ],
-  esbuild: {
-    target: "ES2022",
-  },
+  plugins: [nautilus()],
   resolve: {
     alias: {
       "@src": path.resolve(__dirname, "./src"),
@@ -20,6 +11,7 @@ export default defineConfig({
       "@decorators": path.resolve(__dirname, "./src/decorators"),
       "@registries": path.resolve(__dirname, "./src/registries"),
       "@generated": path.resolve(__dirname, "./build/generated"),
+      "@plugins": path.resolve(__dirname, "./plugins"),
     },
   },
   build: {
@@ -28,14 +20,6 @@ export default defineConfig({
       name: "Nautilus",
       fileName: (format) => `nautilus.${format}.js`,
       formats: ["es", "cjs"],
-    },
-    rollupOptions: {
-      external: ["reflect-metadata"],
-      output: {
-        globals: {
-          "reflect-metadata": "Reflect",
-        },
-      },
     },
     sourcemap: true,
   },
