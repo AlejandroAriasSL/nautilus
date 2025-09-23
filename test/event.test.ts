@@ -36,11 +36,14 @@ describe("@Event decorator", () => {
 
     await import("@src/registries/EventRegistry");
     const { MockComponent } = await import("./mocks/MockComponent");
+    const { default: EventRegistry } = await import("@src/registries/EventRegistry") 
 
     const mockInstance = container.get<MockComponent>(MockComponent);
+    container.getRegistry(EventRegistry)?.attachEvent(mockInstance)
     const spy = vi.spyOn(mockInstance, "onChange");
 
     container.bootstrap();
+    
     button.click();
 
     expect(spy).toHaveBeenCalledTimes(1);

@@ -1,6 +1,9 @@
 import ComponentRegistry, {
   ChildMetadata,
 } from "@src/registries/ComponentRegistry";
+import DIContainer from "@src/DIContainer";
+import { Constructor } from "@src/types";
+import EventRegistry  from "@src/registries/EventRegistry";
 
 interface TemplateRecord {
   templateUrl: string;
@@ -32,6 +35,14 @@ export default class TemplateLoader {
     const rootElement = template.querySelector<HTMLTemplateElement>("template");
     const clone = rootElement?.content.cloneNode(true);
     root.replaceChildren(clone!);
+  
+
+    const registry = DIContainer.getInstance().getRegistry(EventRegistry);
+    const instance = DIContainer.getInstance().get(componentClass as Constructor);
+
+    if (!registry || !instance) return;
+
+    registry.attachEvent(instance)
 
     this.loadStyles(styleUrl);
 
