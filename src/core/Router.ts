@@ -1,6 +1,7 @@
+//@ts-ignore
 import config from "virtual:nautilus"
-import { Nautilus } from "@lib/defineConfig";
 import TemplateLoader from "./TemplateLoader";
+import { UserConfig } from "@lib/defineConfig";
 
 interface NavigationEvent extends Event {
   canIntercept: boolean;
@@ -24,7 +25,7 @@ export default class Router {
   private static basePath: string = "/";
 
   public static async init() : Promise<void> {
-    const userConfig: Pick<Nautilus.UserConfig, "basePath"> = config;
+    const userConfig: Pick<UserConfig, "basePath"> = config;
     Router.basePath = userConfig?.basePath || "/";
 
     if (!this.navigationExists()) {
