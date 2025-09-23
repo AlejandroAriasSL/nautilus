@@ -9,9 +9,19 @@ interface AutowiredEntry {
   type: string;
 }
 
+const CLIENT_CWD = process.cwd();
+const NAUTILUS_DIR = path.join(
+  CLIENT_CWD,
+  "node_modules",
+  "nautilus",
+  "dist",
+  ".nautilus",
+  "generated"
+);
+
 const {
   sourceGlob,
-  outputDir = path.join("build", "generated"),
+  outputDir = NAUTILUS_DIR,
   test: { testSourceGlob, outputDir: testOutputDir } = {},
 } = await loadConfig();
 
@@ -22,7 +32,7 @@ const actualSourceGlob = isTest ? testSourceGlob : sourceGlob;
 const actualOutputDir = isTest ? testOutputDir : outputDir;
 
 const project = new Project({
-  tsConfigFilePath: "./tsconfig.json",
+  tsConfigFilePath: path.join(process.cwd(), "tsconfig.json"),
 });
 
 const sourceFiles = project.getSourceFiles(actualSourceGlob!);
@@ -68,7 +78,7 @@ if (!fs.existsSync(actualOutputDir!))
   fs.mkdirSync(actualOutputDir!, { recursive: true });
 
 fs.writeFileSync(
-  path.join(actualOutputDir!, "autowired-metadata.ts"),
+  path.join(actualOutputDir!, "autowired-metadata.es.js"),
   output,
   "utf-8"
 );
