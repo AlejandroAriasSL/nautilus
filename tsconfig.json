@@ -6,10 +6,10 @@
     "baseUrl": ".",
     "paths": {
       "@src/*": ["src/*"],
-      "@lib/*": ["lib/*"],
+      "@lib/*": ["src/lib/*"],
       "@decorators/*": ["src/decorators/*"],
       "@registries/*": ["src/registries/*"],
-      "@generated/*": ["build/generated/*"],
+      "@generated/*": [".nautilus/generated/*"],
       "@plugins/*": ["plugins/*"],
     },
     "strict": true,
@@ -22,17 +22,14 @@
     "lib": ["ES2022", "DOM"],
     "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": true,
-    "allowImportingTsExtensions": true,
     "noEmit": true
   },
   "include": [
-    "src/**/*", 
-    "lib/*.ts",
+    "src/**/*",
     "test/**/*.ts",
-    "plugins/*.js",
-    "types/virtual-nautilus.d.ts",
+    "src/types/virtual-nautilus.d.ts",
     "*.ts",
     "."
-  ],
+, ".nautilus"  ],
   "exclude": ["node_modules", "dist"]
 }

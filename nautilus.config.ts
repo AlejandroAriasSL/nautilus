@@ -1,8 +1,8 @@
-import { Nautilus } from "@lib/defineConfig";
+import { defineConfig } from "@lib/defineConfig";
 import path from "path";
 
-export default Nautilus.defineConfig({
-  sourceGlob: "lib/**/*.ts",
+export default defineConfig({
+  sourceGlob: "src/lib/**/*.ts",
   basePath: "/",
   test: {
     testSourceGlob: "test/**/*.ts",

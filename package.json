@@ -4,16 +4,32 @@
   "type": "module",
   "main": "dist/nautilus.es.js",
   "module": "dist/nautilus.es.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/nautilus.d.ts",
   "bin": {
     "nautilus": "./bin/nautilus.mjs"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/nautilus.d.ts",
+      "default" : "./dist/nautilus.es.js"
+    },
+    "./decorators": {
+      "types" : "./dist/src/decorators/index.d.ts",
+      "default" : "./dist/src/decorators/index.es.js"
+    } 
+  },
+  "overrides": {
+    "@microsoft/api-extractor": {
+      "typescript": "5.9.2"
+    }
+  },
   "scripts": {
-    "build": "vite build && node scripts/copy-package-json.js",
-    "dev": "vite dev"
+    "build": "vite build" 
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "7.48.1",
     "@rollup/plugin-typescript": "^12.1.4",
+    "@types/reflect-metadata": "^0.0.5",
     "@vitest/coverage-v8": "^3.2.4",
     "happy-dom": "^18.0.1",
     "ts-node": "^10.9.2",
@@ -27,10 +43,10 @@
     "dist"
   ],
   "dependencies": {
-    "@types/reflect-metadata": "^0.0.5",
     "reflect-metadata": "^0.2.2",
     "ts-morph": "^27.0.0",
     "tslib": "^2.8.1",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-nautilus": "file:../vite-plugin-nautilus/vite-plugin-nautilus-0.1.0.tgz"
   }
 }
