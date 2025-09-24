@@ -6,13 +6,8 @@ export default function Autowired(
 ) {
   console.log(target, context);
   context.addInitializer(async function (this: any) {
-    let AUTOWIRED_METADATA : any[] = [];
 
-    try {
-      AUTOWIRED_METADATA = (await import("@generated/autowired-metadata")).AUTOWIRED_METADATA;
-    } catch(error) {
-      console.error(`Error during module resolution, more details: ${error} at ${console.trace()}`)
-    }
+    const AUTOWIRED_METADATA: any[] = Reflect.getMetadata("AUTOWIRED_METADATA", globalThis) || [];
 
     if (AUTOWIRED_METADATA.length === 0) return;
 

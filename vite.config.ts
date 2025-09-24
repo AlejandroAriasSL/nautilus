@@ -1,64 +1,78 @@
 import path from "path";
 import { defineConfig } from "vite";
-import nautilus from "vite-plugin-nautilus";
+import dtsPlugin from "vite-plugin-dts";
+import runCommand from "./scripts/run-command";
+
+const virtualModuleId = "virtual:nautilus";
+const resolvedVirtualModuleId = "\0" + virtualModuleId;
 
 export default defineConfig({
-  plugins: [nautilus()],
+  plugins: [
+    dtsPlugin({
+      outDir: "./dist",
+      insertTypesEntry: true,
+      copyDtsFiles: true,
+      include: ["src", "main.ts"],
+      tsconfigPath: "./tsconfig.json",
+      afterBuild: async (emittedFiles) => {
+        const { mergeFiles } = await import("./scripts/merge-files.js");
+        mergeFiles(emittedFiles);
+      },
+    }),
+    {
+      name: "nautilus-lib",
+      resolveId(id) {
+        if (id === virtualModuleId) {
+          return resolvedVirtualModuleId;
+        }
+      },
+
+      async load(id) {
+        if (id === resolvedVirtualModuleId) {
+          const config = await runCommand(
+            path.resolve(__dirname, "scripts", "load-config.ts")
+          );
+          return `export default ${JSON.stringify(config, null, 2)}`;
+        }
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@src": path.resolve(__dirname, "./src"),
       "@lib": path.resolve(__dirname, "./src/lib"),
       "@decorators": path.resolve(__dirname, "./src/decorators"),
       "@registries": path.resolve(__dirname, "./src/registries"),
-      "@generated": path.resolve(__dirname, "./.nautilus/generated"),
+      "@generated": path.resolve(process.cwd(), "./.nautilus/generated"),
       "@plugins": path.resolve(__dirname, "./plugins"),
     },
+  },
+  esbuild: {
+    target: "es2022",
   },
   build: {
     lib: {
       entry: path.resolve(__dirname, "main.ts"),
-      formats: ["es"],
+      name: "nautilus",
       fileName: (format) => `nautilus.${format}.js`,
-    },
-    rollupOptions: {
-      external: ["fs", "path", "url", "ts-morph"],
-      input: {
-        "main": path.resolve(__dirname, "main.ts"),
-        "src/index": path.resolve(__dirname, "./src/index.ts"),
-        "src/decorators/index": path.resolve(
-          __dirname,
-          "./src/decorators/index.ts",
-        ),
-        "tools/generate-autowired": path.resolve(__dirname, "scripts/generate-autowired.ts"),
-        "tools/inject-static-files" : path.resolve(__dirname, "scripts/inject-static-files.ts"),
-        "tools/get-autowired-metadata" : path.resolve(__dirname, "scripts/get-autowired-metadata.ts"),
-        ".nautilus/generated/autowired-metadata": path.resolve(__dirname, "./.nautilus/generated/autowired-metadata.ts")
-      },
-      output: {
-        entryFileNames: (chunkInfo) => {
-        if (chunkInfo.name === "main") return "nautilus.es.js";
-        return "[name].es.js";
-      },
-        dir: "dist",
-      },
-      
+      formats: ["es"],
     },
     sourcemap: true,
   },
-   test: {
-      globals: true,
-      environment: "happy-dom",
-      setupFiles: ["./vitest.setup.js"],
-      alias: {
-        "@src": path.resolve(__dirname, "./src"),
-        "@lib": path.resolve(__dirname, "./lib"),
-        "@decorators": path.resolve(__dirname, "./src/decorators"),
-        "@registries": path.resolve(__dirname, "./src/registries"),
-        '@generated' : path.resolve(__dirname, './build/generated'),
-      },
-      coverage: {
-        provider: "v8",
-        enabled: true,
-      },
+  test: {
+    globals: true,
+    environment: "happy-dom",
+    setupFiles: ["./vitest.setup.js"],
+    alias: {
+      "@src": path.resolve(__dirname, "./src"),
+      "@lib": path.resolve(__dirname, "./lib"),
+      "@decorators": path.resolve(__dirname, "./src/decorators"),
+      "@registries": path.resolve(__dirname, "./src/registries"),
+      "@generated": path.resolve(__dirname, "./build/generated"),
     },
+    coverage: {
+      provider: "v8",
+      enabled: true,
+    },
+  },
 });

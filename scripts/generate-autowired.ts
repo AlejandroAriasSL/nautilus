@@ -1,4 +1,4 @@
-import { ClassDeclaration, Project, PropertyDeclaration } from "ts-morph";
+import { ClassDeclaration, Project } from "ts-morph";
 import fs from "fs";
 import path from "path";
 import { loadConfig } from "./load-config";
@@ -12,9 +12,6 @@ interface AutowiredEntry {
 const CLIENT_CWD = process.cwd();
 const NAUTILUS_DIR = path.join(
   CLIENT_CWD,
-  "node_modules",
-  "nautilus",
-  "dist",
   ".nautilus",
   "generated"
 );
@@ -78,7 +75,7 @@ if (!fs.existsSync(actualOutputDir!))
   fs.mkdirSync(actualOutputDir!, { recursive: true });
 
 fs.writeFileSync(
-  path.join(actualOutputDir!, "autowired-metadata.es.js"),
+  path.join(actualOutputDir!, "autowired-metadata.ts"),
   output,
   "utf-8"
 );

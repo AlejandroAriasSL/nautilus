@@ -11,12 +11,15 @@
   "exports": {
     ".": {
       "types": "./dist/nautilus.d.ts",
-      "default" : "./dist/nautilus.es.js"
+      "default": "./dist/nautilus.es.js"
     },
     "./decorators": {
-      "types" : "./dist/src/decorators/index.d.ts",
-      "default" : "./dist/src/decorators/index.es.js"
-    } 
+      "types": "./dist/src/decorators/index.d.ts",
+      "default": "./dist/src/decorators/index.es.js"
+    },
+    "./tools/*": {
+      "default": "./dist/tools/*"
+    }
   },
   "overrides": {
     "@microsoft/api-extractor": {
@@ -24,7 +27,7 @@
     }
   },
   "scripts": {
-    "build": "vite build" 
+    "build": "vite build --config vite.config.ts && vite build --config vite.tools.config.ts"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "7.48.1",
