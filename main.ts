@@ -1,5 +1,1 @@
-import { DIContainer } from "@src/index"
-import "@src/index"
-import "@lib/index"
-
-DIContainer.getInstance().bootstrap();
+export * from "@src/index"

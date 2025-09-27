@@ -1,12 +1,16 @@
 import DIContainer from "@src/DIContainer";
-import { AUTOWIRED_METADATA } from "@generated/autowired-metadata";
 
 export default function Autowired(
   target: any,
   context: ClassMemberDecoratorContext
 ) {
   console.log(target, context);
-  context.addInitializer(function (this: any) {
+  context.addInitializer(async function (this: any) {
+
+    const AUTOWIRED_METADATA: any[] = Reflect.getMetadata("AUTOWIRED_METADATA", globalThis) || [];
+
+    if (AUTOWIRED_METADATA.length === 0) return;
+
     const entry = AUTOWIRED_METADATA.find(
       (meta) =>
         meta.targetClass === this.constructor.name &&

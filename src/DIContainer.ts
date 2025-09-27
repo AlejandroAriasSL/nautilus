@@ -31,6 +31,7 @@ export default class DIContainer {
   }
 
   public addRegistry(registry: Registry){
+    if (this.registers.has(registry)) return;
     this.registers.add(registry);
   }
 
@@ -42,9 +43,21 @@ export default class DIContainer {
 
   public get<T>(constructor: Constructor, ...deps: any[]): T {
     if (!this.instances.has(constructor)) {
-      this.createInstance(constructor, ...deps);
+      const instance = this.createInstance(constructor, ...deps);
+      this.registers.forEach(register => register.register(instance))
     }
     return this.instances.get(constructor) as T;
+  }
+
+  public getRegistry<T extends Registry>(constructor: Constructor<T>) : T | undefined{
+    const found = 
+      Array.from(this.registers)
+        .find(register => register instanceof constructor);
+    
+    if (found) {
+      return found as T
+    }
+    return undefined
   }
 
   public getByTypeName<T>(typeName: string): T {
@@ -61,6 +74,5 @@ export default class DIContainer {
 
   public bootstrap() {
     this.classes.forEach(constructor => this.get(constructor));
-    this.instances.forEach(instance => this.registers.forEach(register => register.register(instance)))
   }
 }

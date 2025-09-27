@@ -1,4 +1,4 @@
-import { ClassDeclaration, Project, PropertyDeclaration } from "ts-morph";
+import { ClassDeclaration, Project } from "ts-morph";
 import fs from "fs";
 import path from "path";
 import { loadConfig } from "./load-config";
@@ -9,9 +9,16 @@ interface AutowiredEntry {
   type: string;
 }
 
+const CLIENT_CWD = process.cwd();
+const NAUTILUS_DIR = path.join(
+  CLIENT_CWD,
+  ".nautilus",
+  "generated"
+);
+
 const {
   sourceGlob,
-  outputDir = path.join("build", "generated"),
+  outputDir = NAUTILUS_DIR,
   test: { testSourceGlob, outputDir: testOutputDir } = {},
 } = await loadConfig();
 
@@ -22,7 +29,7 @@ const actualSourceGlob = isTest ? testSourceGlob : sourceGlob;
 const actualOutputDir = isTest ? testOutputDir : outputDir;
 
 const project = new Project({
-  tsConfigFilePath: "./tsconfig.json",
+  tsConfigFilePath: path.join(process.cwd(), "tsconfig.json"),
 });
 
 const sourceFiles = project.getSourceFiles(actualSourceGlob!);

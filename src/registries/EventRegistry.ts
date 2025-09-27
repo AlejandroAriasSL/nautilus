@@ -7,27 +7,45 @@ interface EventMetaData {
   methodName: string;
   eventType: string;
   selector: string;
+  instance: any;
 }
 
 @RegisterClass
 export default class EventRegistry extends Registry {
+
+  private attached = new WeakMap<Function, Set<EventMetaData>>();
+
   public register(instance: any): void {
-    console.log("estoy registrando un evento en: ", instance)
-    this.lookForEvents(instance).forEach(
-      ({ methodName, eventType, selector }) => {
-        const element = document.querySelector(selector);
-        element?.addEventListener(
-          eventType,
-          this.preserveThis(instance, methodName)
-        );
-      }
-    );
+
+    if(this.attached.has(instance)) return;
+    const events = this.lookForEvents(instance);
+
+    if (events.size === 0) return;
+    this.attached.set(instance, events);
   }
 
-  private lookForEvents(instance: any): EventMetaData[] {
-    const prototype = Object.getPrototypeOf(instance);
+  public attachEvent(instance : any) : void {
+    const events = this.attached.get(instance); 
+    
+    if (!events) return;
 
-    return Object.getOwnPropertyNames(prototype)
+    events.forEach(event => {
+      const {methodName, eventType, selector, instance} = event;
+      const element = document.querySelector(selector);
+  
+      if (!element) return;
+      element?.addEventListener(
+        eventType,
+        this.preserveThis(instance, methodName)
+      );
+    })
+  }
+
+  private lookForEvents(instance: any): Set<EventMetaData> {
+    const prototype = Object.getPrototypeOf(instance);
+    const events = new Set<EventMetaData>();
+
+    Object.getOwnPropertyNames(prototype)
       .filter((name) => name !== "constructor")
       .filter((name) => Reflect.hasMetadata(EVENT_METADATA_KEY, prototype[name], "method"))
       .map((name) => ({
@@ -42,7 +60,11 @@ export default class EventRegistry extends Registry {
           prototype[name],
           "method"
         ),
+        instance: instance
       }))
-      .filter((meta) => Boolean(meta.eventType && meta.selector));
+      .filter((meta) => Boolean(meta.eventType && meta.selector))
+      .forEach((meta) => events.add(meta))
+
+      return events
   }
 }
