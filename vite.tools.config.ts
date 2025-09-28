@@ -10,6 +10,7 @@ export default defineConfig({
       "@registries": path.resolve(__dirname, "./src/registries"),
       "@generated": path.resolve(__dirname, "./.nautilus/generated"),
       "@plugins": path.resolve(__dirname, "./plugins"),
+      "platform": resolve(__dirname, "./platform")
     },
   },
   esbuild: {
@@ -28,6 +29,10 @@ export default defineConfig({
           __dirname,
           "scripts/inject-static-files.ts"
         ),
+        "run-compiler": resolve(
+          __dirname,
+          "scripts/run-compiler.ts"
+        )
       },
       output: {
         entryFileNames: (chunkInfo) => {
