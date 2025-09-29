@@ -5,10 +5,8 @@ export const createAutowiredEntry = (clazz: ClassDeclaration, prop: PropertyDecl
 AutowiredDep => 
 (
     { 
-        targetClass: clazz.getName() ?? undefined,
         propertyKey: prop.getName() ?? undefined,
         type: prop.getTypeNode()?.getText() ?? ""
-     
     } 
 
 );

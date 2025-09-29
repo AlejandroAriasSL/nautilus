@@ -14,6 +14,7 @@ InspectionResult
   const obj = arg?.asKind(SyntaxKind.ObjectLiteralExpression);
   if (!obj) return { path: "", stylesUrl: "" };
 
+
   return obj.getProperties()
     .filter((prop): prop is PropertyAssignment => prop.getKind() === SyntaxKind.PropertyAssignment)
     .reduce((acc, prop) => {

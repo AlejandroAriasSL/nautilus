@@ -1,7 +1,9 @@
+import Node from "platform/core/Node";
+import Tree from "platform/core/Tree";
 import { Preprocessor } from "platform/core/Preprocessor";
 import { createAutowiredEntry } from "platform/factories/AutowiredFactory";
 import { createComponent } from "platform/factories/ComponentFactory";
-import { ClassDeclaration, Project, PropertyDeclaration, SourceFile } from "ts-morph";
+import { ClassDeclaration, Decorator, Project, PropertyDeclaration, SourceFile } from "ts-morph";
 
 type TsPreProcessorInput = {
     tsConfigPath: string;
@@ -10,7 +12,7 @@ type TsPreProcessorInput = {
 
 type TsPreProcessorOutput = {
     component?: string | undefined;
-    parent?: Function;
+    parent?: string;
     slot?: string
     templateUrl?: string;
     path?: string;
@@ -24,18 +26,25 @@ type Analyzer<T = InspectionResult> = (clazz: ClassDeclaration) =>  T[];
 export type InspectionResult = Partial<TsPreProcessorOutput>;
 
 export type AutowiredDep = {
-    targetClass?: string;
     propertyKey: string;
     type: string;
 }
 
-export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput, TsPreProcessorOutput> {
+export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput, Node> {
 
     private project : Project
     private sourceFiles : SourceFile[];
+    private tree : Tree;
+
+
+    constructor()
+    {
+        this.tree = new Tree();
+    }
+
 
     public process(input : TsPreProcessorInput) : 
-    TsPreProcessorOutput[] 
+    Node
     {
         const {tsConfigPath, sourceGlob} = input;
 
@@ -43,20 +52,50 @@ export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput,
         this.sourceFiles = this.project.getSourceFiles(sourceGlob);
 
         const classDeclarations: ClassDeclaration[] = this.sourceFiles.flatMap(file => file.getClasses());
-        return classDeclarations.flatMap(clazz => this.inspect(clazz));
+        const nodes = classDeclarations.map(clazz => this.inspect(clazz)).filter(Boolean) as Node[];
+        this.insertNodes(nodes)
+    
+        return this.tree.root;
     } 
+
+    private insertNodes = (nodes: Node[] | undefined) : 
+    void => 
+    {
+        nodes?.forEach(
+        node => 
+        {
+           node.parent = this.tree.find(node.data?.parent) ?? null;
+           if (node.data?.parent) delete node.data.parent;
+           this.tree.insert(node)
+        } 
+    );
+    }
 
 
     private inspect = (clazz: ClassDeclaration) : 
-    TsPreProcessorOutput => 
-    (
+    Node | undefined => 
+    {
+        const className = clazz.getName();
+        if (!className) return;
+
+        const componentData = this.inspectComponent(clazz);
+        const autowiredDeps = this.inspectAutowired(clazz);
+
+        if (!componentData?.parent)
         {
-            component: this.isComponent(clazz) ? clazz.getName() : undefined,
-            ...this.inspectComponent(clazz),
-            autowiredDeps: this.inspectAutowired(clazz),
-            observables: [],
-        } 
-    )
+            const nodeData = {...componentData, autowiredDeps, observables: []};
+            const node = new Node(className, nodeData);
+    
+            this.tree.insert(node)
+            return;
+
+        }
+
+        const nodeData = {...componentData, autowiredDeps, observables: []};
+        const node = new Node(className, nodeData)
+
+        return node;
+    }
 
 
     private inspectAutowired : 
@@ -69,25 +108,22 @@ export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput,
 
 
     private inspectComponent = (clazz: ClassDeclaration) : 
-    InspectionResult => 
+    InspectionResult | undefined => 
     {
-        if (!this.isComponent(clazz)) return {}
+        const decorator = this.findDecoratorIfAny(clazz, ["Component", "Child"])
 
-        const decorator = clazz.getDecorators()
-            .find(decorator => ["Child", "Component"].includes(decorator.getName()));
+        if (!decorator) return;
 
-        return decorator 
-               ? createComponent(decorator) 
-               : {}
+        return createComponent(decorator);  
     }
 
 
-    private isComponent = (clazz: ClassDeclaration) : 
-    boolean => 
-        clazz.getDecorators().some((decorator) => 
-            ["Child", "Component"].includes(decorator.getName()));
+    private findDecoratorIfAny = (clazz: ClassDeclaration, candidates: Array<string>):
+    Decorator | undefined =>
+        clazz.getDecorators()
+            .find(decorator => candidates.includes(decorator.getName()));
 
-    
+
     private isDecorator = (prop: PropertyDeclaration, decoratorName: string) : 
     boolean => 
         prop.getDecorators()
@@ -97,10 +133,4 @@ export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput,
     private hasType = (prop: PropertyDeclaration) : 
     boolean =>
         prop.getTypeNode()?.getText() !== null;
-
-
-    private getTemplateUrl = (clazz: ClassDeclaration): 
-    string => 
-        "default-template.html"; // temporal
-
 }
