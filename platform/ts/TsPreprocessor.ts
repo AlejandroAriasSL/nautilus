@@ -30,7 +30,7 @@ export type AutowiredDep = {
     type: string;
 }
 
-export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput, Node> {
+export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput, Tree> {
 
     private project : Project
     private sourceFiles : SourceFile[];
@@ -44,7 +44,7 @@ export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput,
 
 
     public process(input : TsPreProcessorInput) : 
-    Node
+    Tree
     {
         const {tsConfigPath, sourceGlob} = input;
 
@@ -55,7 +55,7 @@ export default class TsPreprocessor implements Preprocessor<TsPreProcessorInput,
         const nodes = classDeclarations.map(clazz => this.inspect(clazz)).filter(Boolean) as Node[];
         this.insertNodes(nodes)
     
-        return this.tree.root;
+        return this.tree;
     } 
 
     private insertNodes = (nodes: Node[] | undefined) : 

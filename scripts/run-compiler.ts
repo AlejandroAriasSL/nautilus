@@ -6,7 +6,7 @@ const tsInput = {
     sourceGlob: "src/**/*.ts"
 }
 
-const result = Compiler.compile(tsInput)[0];
+const result = Compiler.compile(tsInput);
 if (result instanceof Node){
     const serialize = (node : Node): any => ({
         name: node.name,

@@ -38,7 +38,7 @@ export default class Node {
         this.children.size > 0; 
 
 
-    public traverse = 
+    public findFirst = 
     <T>(
         callback: (node: Node) => T | undefined, 
         found?: {value: boolean}
@@ -58,10 +58,30 @@ export default class Node {
 
         for (const child of this.children.values())
         {
-            const result = child.traverse(callback, found);
+            const result = child.findFirst(callback, found);
             if (result !== undefined) return result;
         }
 
         return undefined;
     }
+
+    public filter = 
+    <T>(
+        callback: (node: Node) => T | undefined,
+        results: T[] = []
+    ) :
+    T[] =>
+    {
+        const result = callback(this);
+
+        if (result !== undefined) results.push(result);
+
+        for (const child of this.children.values())
+        {
+            child.filter(callback, results);
+        }
+
+        return results;
+    }
+
 }

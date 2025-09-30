@@ -4,9 +4,9 @@ export default class Tree {
     root: Node;
     recentLookUps: Map<string, Node> = new Map();
 
-    constructor()
+    constructor(rootNode?: Node)
     {
-        this.root = new Node("Batman")
+        this.root = rootNode ?? new Node("Batman")
     }
 
     public insert = (node : Node) : 
@@ -23,7 +23,7 @@ export default class Tree {
 
         if(!found) return; 
 
-        found.traverse((node) => this.recentLookUps.delete(node.name))
+        found.findFirst((node) => this.recentLookUps.delete(node.name))
         found.parent?.children.delete(found.name)
         found.parent = null;
     }
@@ -36,7 +36,7 @@ export default class Tree {
         const cached = this.recentLookUps.get(name);
         if (cached) return cached;
 
-        const foundRecursive = this.root.traverse<Node>(this.recursiveSearchCb(name))
+        const foundRecursive = this.root.findFirst<Node>(this.recursiveSearchCb(name))
         if (foundRecursive)
         {
             this.recentLookUps.set(name, foundRecursive);
